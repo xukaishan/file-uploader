@@ -6,10 +6,19 @@
   <title>uploader-demo</title>
 </head>
 <body>
-  <div class="app"></div>
+  <div class="app">
+    <button id='fileBtn'>按钮</button>
+    <button id='upload'>上传</button>
+  </div>
 </body>
 <script type='module'>
   import BaseUploader from '../src/uploader/index.js';
-  console.log(BaseUploader)
+  const baseUploader = new BaseUploader()
+  fileBtn.addEventListener('click', ev => {
+    baseUploader.click()
+  })
+  upload.addEventListener('click', ev => {
+    baseUploader.upload()
+  })
 </script>
 </html>

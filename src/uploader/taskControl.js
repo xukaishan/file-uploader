@@ -4,17 +4,14 @@ class EventControler {
   }
   /** 事件监听 */
   on (name, callback) {
-    if (!this.events[name]) {
-      this.events[name] = [];
-    }
+    this.events[name] = this.events[name] || (this.events[name] = [])
     const cbs = typeof callback === 'function' && [callback] || callback
     this.events[name].push(...cbs);
   }
   /** 事件触发 返回 Promise */
   trigger (name, info, limit) {
-    const len = this.events[name].length
-    if (this.events[name] && len) {
-      return this.limitTask(this.events[name], limit || len, info)
+    if (this.events[name] && this.events[name].length) {
+      return this.limitTask(this.events[name], limit || this.events[name].length, info)
     }
   }
   /** 事件取消 */
@@ -30,9 +27,9 @@ class EventControler {
     }
   }
   /** 并发事件控制 */
-  limitTask (arr, count = 6, params) {
+  limitTask (arr, count = 2, params) {
     return new Promise((resolve, reject) => {
-      let g = generator();
+      let g = gen();
       let keep = true;
       let result = [];
       for (let i = 0; i < count; i++) {
@@ -42,11 +39,13 @@ class EventControler {
       function nextCall () {
         let { value, done } = g.next();
         if (typeof value.then === 'function') {
+          console.log(value)
           done || value.then((data) => {
             if (data === 'reject') {
               resolve(result);
               return;
             }
+            console.log(data)
             result.push(data);
             if (result.length === arr.length) {
               keep = false;
@@ -67,7 +66,7 @@ class EventControler {
         }
       }
 
-      function* generator () {
+      function* gen () {
         if (arr.length === 0) {
           yield Promise.resolve('reject');
         }
